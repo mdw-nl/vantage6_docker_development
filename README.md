@@ -24,8 +24,8 @@ docker compose up -d
 Our current way of getting the vantage6 code into the container is hacky, but
 allows us to not have to re-build every time we make a change. However,
 modifications made in the container like:
-* `__pycache__/*.pyc` files
-* our apply of our patch
+* ~~`__pycache__/*.pyc` files~~ --> No longer generated with PYTHONDONTWRITEBYTECODE
+* our apply of our patch (and patches .orig backup)
 Will also happen on the host, as the `/vantage6` is simply volume mapped.
 This can get annoying because new files (like .pyc) end up with root:root
 permissions on the host, and deleting can be cumbersome.
