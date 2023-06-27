@@ -2,7 +2,7 @@
 
 * Git clone this repo
 ```
-git clone git@github.com:mdw-nl/vantage6_docker.git
+git clone --recursive git@github.com:mdw-nl/vantage6_docker_development.git
 ```
 
 * Clone submodules (`vantage6` and `vantage6_docker`)
@@ -51,4 +51,5 @@ container modifications.
 
 ### submodules
 
-Keeping in mind to update submodules is not the best..
+Keeping in mind to update submodules is not the best. Tempted to do away with
+submodules all together and just do git clone / git pull from `init.sh`
