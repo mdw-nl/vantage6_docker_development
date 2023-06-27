@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+echo "Cloning repos.."
+git clone https://github.com/vantage6/vantage6.git || true
+git clone git@github.com:mdw-nl/vantage6_docker.git || true
+
 # If venv doesn't exist install it
 if [[ ! -d "./venv" ]]; then
     echo "Installing venv"

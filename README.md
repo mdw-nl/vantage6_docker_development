@@ -2,15 +2,10 @@
 
 * Git clone this repo
 ```
-git clone --recursive git@github.com:mdw-nl/vantage6_docker_development.git
+git clone git@github.com:mdw-nl/vantage6_docker_development.git
 ```
 
-* Clone submodules (`vantage6` and `vantage6_docker`)
-```
-git submodule clone
-```
-
-* Populate `.egg-link`s and install venv with vantage6 for client testing.
+* Initialize: clone `vantage6` and `vantage6_docker`, populate `.egg-link`s and install venv with vantage6 for client testing.
 ```
 ./init.sh
 ```
@@ -49,7 +44,6 @@ So, ideally, it would be cool if we could do a three-way merge of the image
 `/vantage6`, the volume mapped one (for changes while developing), and the
 container modifications.
 
-### submodules
+### The whole thing is not robust!
 
-Keeping in mind to update submodules is not the best. Tempted to do away with
-submodules all together and just do git clone / git pull from `init.sh`
+Code speaks for itself, but we have to start somewhere :)
