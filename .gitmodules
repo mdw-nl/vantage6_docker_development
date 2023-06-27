@@ -1,6 +1,8 @@
 [submodule "vantage6_docker"]
 	path = vantage6_docker
 	url = git@github.com:mdw-nl/vantage6_docker.git
+	branch = main
 [submodule "vantage6"]
 	path = vantage6
 	url = https://github.com/vantage6/vantage6.git
+	branch = main
