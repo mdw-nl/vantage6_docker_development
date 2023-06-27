@@ -1,0 +1,4 @@
+# Here we specify list of databases
+- label: diabetes_csv
+  uri: mars_diabetes.csv
+  type: csv

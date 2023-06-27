@@ -1,0 +1,50 @@
+# Test development entities (collaboration, organizations, nodes, users)
+#
+# You can load this file by using:
+#  $ vserver-local import entities.yaml --config /path/to/config.yaml --env dev|acc|prod
+# Will be processed by:
+#  https://github.com/vantage6/vantage6/blob/version/3.10.3/vantage6-server/vantage6/server/controller/fixture.py#L31
+
+collaborations:
+  - name: "Planets Development"
+    encrypted: False
+    participants:
+      - name: "Mars"
+        # dev/test key, written to dev-secrets/
+        api_key: "d83ef105-5388-4d8c-ba58-4ae79eab9b71"
+      - name: "Saturn"
+        # dev/test key, written to dev-secrets/
+        api_key: "b991d24f-2d9f-4b02-baff-0bc78b70dbec"
+      - name: "Jupiter"
+        # dev/test key, written to dev-secrets/
+        api_key: "afdf68da-3e8a-4b33-9594-c68b0ed821ca"
+
+organizations:
+  - name: "Mars"
+    domain: "mars.dev.example.com"
+    address1: "1.524 AU"
+    address2: "1.85 deg"
+    zipcode: "91109"
+    country: "Marsland"
+    public_key: ""
+    public_key: ""
+  - name: "Jupiter"
+    domain: "jupiter.dev.example.com"
+    address1: "5.204 AU"
+    address2: "1.30 deg"
+    zipcode: "77058"
+    country: "Jupiterland"
+    public_key: ""
+  - name: "Saturn"
+    domain: "saturn.dev.example.com"
+    address1: "9.537 AU"
+    address2: "2.48 deg"
+    zipcode: "94035"
+    country: "Saturnland"
+    public_key: ""
+    users:
+      - username: "titan"
+        firstname: "Titan"
+        lastname: "Moon"
+        password: "test-password-cloudy-orbit"
+
