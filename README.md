@@ -17,22 +17,19 @@ docker compose up -d
 
 * Develop code under `vantage6/`! If need be restart a container to get it to pick up modifications.
 
-* Access UI at:
+* Minimal test:
+  * Access http://127.0.6.1:8080
+    With the credentials:
+    * user: `root`
+    * password: `test_just_a_testing_password_initial_root_password_A123.`
+    (found under `dev-secrets/initial-root-password`)
+    Or with:
+    * user: `titan`
+    * password: `test-password-cloudy-orbit`
+    `titan` is a user of organization Saturn
+    See: `dev-v6-server/entities.yaml`
 
-http://127.0.6.1:8080
-
-With the credentials:
-* user: `root`
-* password: `test_just_a_testing_password_initial_root_password_A123.`
-(found under `dev-secrets/initial-root-password`)
-
-Or with:
-* user: titan
-* password: `test-password-cloudy-orbit`
-`titan` is a user of organization Saturn
-See: `dev-v6-server/entities.yaml`
-
-You can also test the API of the vantage6 server itself by navigating to: http://127.0.6.1/api/version
+  * You can also test the API of the vantage6 server itself by navigating to: http://127.0.6.1/api/version
 
 
 ## TODO
