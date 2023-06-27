@@ -23,10 +23,11 @@ docker compose up -d
     * user: `root`
     * password: `test_just_a_testing_password_initial_root_password_A123.`
     (found under `dev-secrets/initial-root-password`)
+
     Or with:
     * user: `titan`
     * password: `test-password-cloudy-orbit`
-    `titan` is a user of organization Saturn
+    `titan` is a user of organization Saturn.
     See: `dev-v6-server/entities.yaml`
 
   * You can also test the API of the vantage6 server itself by navigating to: http://127.0.6.1/api/version
