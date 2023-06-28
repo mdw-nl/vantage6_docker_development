@@ -28,4 +28,6 @@ pip install -e vantage6/vantage6-client
 pip install -e vantage6/vantage6
 pip install -e vantage6/vantage6-node
 pip install -e vantage6/vantage6-server
+pip install -e jupyter
+# TODO: requirements.txt?
 
