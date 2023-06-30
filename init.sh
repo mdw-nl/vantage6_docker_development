@@ -2,8 +2,9 @@
 
 set -euo pipefail
 
+# TODO: This needs to change! Very much tailored to just us for now
 echo "Cloning repos.."
-git clone https://github.com/vantage6/vantage6.git || true
+git clone -b experimental/dockerized-dev-env git@github.com:mdw-nl/vantage6_docker.git || true
 git clone git@github.com:mdw-nl/vantage6_docker.git || true
 
 # If venv doesn't exist install it
