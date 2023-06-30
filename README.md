@@ -62,3 +62,19 @@ container modifications.
 ### The whole thing is not robust!
 
 Code speaks for itself, but we have to start somewhere :)
+
+### Macbook M1 issue!
+To make it work on Apple M1 product some changes are required 
+- Change docker-compose.yml :ports:
+       ports:
+      - "127.0.6.1:80:80" --> 8085:80 ( check the port that is available)
+       v6-ui:
+        ports:
+            - "8080:80"
+          environment:
+            SERVER_URL: http://localhost:8085
+
+      
+
+
+
