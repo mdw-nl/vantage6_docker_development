@@ -63,7 +63,7 @@ container modifications.
 
 Code speaks for itself, but we have to start somewhere :)
 
-### Macbook M1 issue!
+### Macbook M1 changes
 To make it work on Apple M1 product some changes are required 
 - Change docker-compose.yml :ports:
        ports:
@@ -73,6 +73,7 @@ To make it work on Apple M1 product some changes are required
             - "8080:80"
           environment:
             SERVER_URL: http://localhost:8085
+  
 
       
 
