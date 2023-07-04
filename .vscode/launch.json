@@ -1,0 +1,52 @@
+{
+    "configurations": [
+        {
+            "name": "Python: Remote Attach (v6-server)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.6.1",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Remote Attach (v6-node-mars)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.6.10",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": true
+        },
+        {
+            "name": "Python: Remote Attach (v6-node-saturn)",
+            "type": "python",
+            "request": "attach",
+            "connect": {
+                "host": "127.0.6.11",
+                "port": 5678
+            },
+            "pathMappings": [
+                {
+                    "localRoot": "${workspaceFolder}",
+                    "remoteRoot": "."
+                }
+            ],
+            "justMyCode": true
+        }
+    ]
+}
