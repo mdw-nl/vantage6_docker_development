@@ -6,15 +6,13 @@ set -euo pipefail
 #source /start-up.d/common/lib.sh
 
 # We are effectively overriding/extending start_server() here.
-start_server() {
+start_node() {
     # debugpy will allow us to attach a debugger to the running server.
-    python /tmp/debugpy --listen 0.0.0.0:5678 $(which vserver-local) start --config ${V6_CONFIG_PATH}
+    python /tmp/debugpy --listen 0.0.0.0:5678 $(which vnode-local) start --config ${V6_CONFIG_PATH} --dockerized
 }
 
 dev_setup() {
     echo "Setting up dev environment"
-    vserver-local import ${CUSTOM_DIR}/entities.yaml --config /mnt/config/config.yaml
-
     pip install debugpy -t /tmp
 }
 

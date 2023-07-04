@@ -15,6 +15,7 @@ services:
     ports:
       # TODO: This work on Linux, but I'm not sure it works on Docker Desktop?
       - "127.0.6.1:80:80"
+      - "127.0.6.1:5678:5678"
     environment:
       ENV_V6_SECRET_KEY_FILE: /run/secrets/v6-secret-key
       V6_INITIAL_ROOT_PASSWORD_FILE: /run/secrets/v6-root-password
@@ -26,6 +27,7 @@ services:
       # For development only, as we live mount /vantage6 we don't want
       # root:root .pyc files on the host.
       PYTHONDONTWRITEBYTECODE: 1
+      GEVENT_SUPPORT: "True"
     volumes:
       - ./vantage6_docker/v6-server/:/start-up.d/app/
       - ./vantage6_docker/v6-common/:/start-up.d/common/
@@ -61,6 +63,8 @@ services:
     image: harbor2.vantage6.ai/infrastructure/node:${V6_VERSION}
     depends_on:
       - v6-server
+    ports:
+      - "127.0.6.10:5678:5678"
     environment:
       ENV_V6_API_KEY_FILE: /run/secrets/v6-node-mars-api-key
       ENV_V6_SERVER_URL: http://v6-server
@@ -93,6 +97,8 @@ services:
     image: harbor2.vantage6.ai/infrastructure/node:${V6_VERSION}
     depends_on:
       - v6-server
+    ports:
+      - "127.0.6.11:5678:5678"
     environment:
       ENV_V6_API_KEY_FILE: /run/secrets/v6-node-saturn-api-key
       ENV_V6_SERVER_URL: http://v6-server
