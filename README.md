@@ -73,9 +73,12 @@ To make it work on Apple M1 product some changes are required
             - "8080:80"
           environment:
             SERVER_URL: http://localhost:8085
-  
 
-      
+### Volume map debugpy?
 
+We could pip install (-t) debugpy somewhere like `/opt/debugpy/` and then make
+/opt/debugpy a volume. That way we don't have to re-install debugpy every time
+we up the container. Perhaps nodes and server can even share the volume, as
+long a no state is kept there, which it shouldn't?
 
 
