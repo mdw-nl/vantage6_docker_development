@@ -1,3 +1,7 @@
+# What's this?
+
+Scaffolding around vantage6 to create a developemnt environment. Very much under construction and dependent on full dockerization of vantage6 (node included)
+
 # How to get started
 
 * Git clone this repo
@@ -14,33 +18,37 @@ git clone git@github.com:mdw-nl/vantage6_docker_development.git
 ```
 docker compose up -d
 ```
+:construction: On latest commit, this probably won't work. :P :construction:
 
 * Develop code under `vantage6/`! If need be restart a container to get it to pick up modifications.
 
-* Minimal test:
-  * Access http://127.0.6.1:8080
-    With the credentials:
-    * user: `root`
-    * password: `test_just_a_testing_password_initial_root_password_A123.`
-    (found under `dev-secrets/initial-root-password`)
+# Simple proof of concept test..
+* Access http://127.0.6.1:8080
+  With the credentials:
+  * user: `root`
+  * password: `test_just_a_testing_password_initial_root_password_A123.`
+  (found under `dev-secrets/initial-root-password`)
 
-    Or with:
-    * user: `titan`
-    * password: `test-password-cloudy-orbit`
-    `titan` is a user of organization Saturn.
-    See: `dev-v6-server/entities.yaml`
-
-  * You can also test the API of the vantage6 server itself by navigating to: http://127.0.6.1/api/version
-
+  Or with:
+  * user: `titan`
+  * password: `test-password-cloudy-orbit`
+  `titan` is a user of organization Saturn.
+  See: `dev-v6-server/custom-start.d/entities.yaml`
+* You can also test the API of the vantage6 server itself by navigating to: http://127.0.6.1/api/version
+* Give user `titan` Researcher role
+* Try running this simple [jupyter notebook](./client/Template_Create_Task.ipynb)
 
 ## TODO
+
+### Mainly: settle on design direction for full dockerzation on v6 side
+And then adapt this repo for it.
 
 ### Fancier fs merging
 Our current way of getting the vantage6 code into the container is hacky, but
 allows us to not have to re-build every time we make a change. However,
 modifications made in the container like:
 * ~~`__pycache__/*.pyc` files~~ --> No longer generated with PYTHONDONTWRITEBYTECODE
-* our apply of our patch (and patches .orig backup)
+* ~~our apply of our patch (and patches .orig backup)~~ --> already modified in our experimental branch of vantage6
 Will also happen on the host, as the `/vantage6` is simply volume mapped.
 This can get annoying because new files (like .pyc) end up with root:root
 permissions on the host, and deleting can be cumbersome.
@@ -63,16 +71,11 @@ container modifications.
 
 Code speaks for itself, but we have to start somewhere :)
 
+
 ### Macbook M1 changes
-To make it work on Apple M1 product some changes are required 
-- Change docker-compose.yml :ports:
-       ports:
-      - "127.0.6.1:80:80" --> 8085:80 ( check the port that is available)
-       v6-ui:
-        ports:
-            - "8080:80"
-          environment:
-            SERVER_URL: http://localhost:8085
+To make it work on Apple M1 product some changes are required. You can try https://github.com/mdw-nl/vantage6_docker_development/issues/2
+Or just change all the 127.0.6.0/24 IPs to 127.0.0.1 (or omit the IP), and use
+different ports for each service.
 
 ### Volume map debugpy?
 

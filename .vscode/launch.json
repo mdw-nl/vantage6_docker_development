@@ -1,7 +1,7 @@
 {
     "configurations": [
         {
-            "name": "Python: Remote Attach (v6-server)",
+            "name": "Python: Remote Attach (server)",
             "type": "python",
             "request": "attach",
             "connect": {
@@ -17,7 +17,7 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Remote Attach (v6-node-mars)",
+            "name": "Python: Remote Attach (node-mars)",
             "type": "python",
             "request": "attach",
             "connect": {
@@ -33,7 +33,7 @@
             "justMyCode": true
         },
         {
-            "name": "Python: Remote Attach (v6-node-saturn)",
+            "name": "Python: Remote Attach (node-saturn)",
             "type": "python",
             "request": "attach",
             "connect": {

@@ -1,56 +1,60 @@
 #
 # Simple developement environment for vantage6 [EXPERIMENTAL]
 #
+name: dev-v6
+
 services:
-  v6-server:
-    # TODO: We could also specify the build instead of pulling from an image.
-    #       At the moment, we just assume that V6_VERSION is the latest, so
-    #       this "should" be ok enough for development. (Same applies to nodes).
-    #       Using the image could become a problem if there are changs outside
+  server:
+    # NOTE: We could also specify the build instead of pulling from an image.
+    #       But perhaps building should be left for the current vantage6/Makefile.
+    #       At the moment we assume we are going to develop (purpose of this container)
+    #       on the latest version which can be built via vantage6/Makefile.
+    #       Using the image could become a problem if there are changes outside
     #       /vantage6 in the image that are required for changes in /vantage6
-    #       (package dependencies for example).
-    image: harbor2.vantage6.ai/infrastructure/server:${V6_VERSION}
+    #       (apt package dependencies for example).
+    #image: harbor2.vantage6.ai/infrastructure/server:${V6_VERSION}
+    image: harbor2.vantage6.ai/infrastructure/dockerized-server:${V6_VERSION}
     depends_on:
-      - v6-database
+      - database
     ports:
-      # TODO: This work on Linux, but I'm not sure it works on Docker Desktop?
+      # TODO: This works fine on Linux, but not in MacOS, unsure about windows / Docker Desktop?
       - "127.0.6.1:80:80"
       - "127.0.6.1:5678:5678"
     environment:
-      ENV_V6_SECRET_KEY_FILE: /run/secrets/v6-secret-key
       V6_INITIAL_ROOT_PASSWORD_FILE: /run/secrets/v6-root-password
-      ENV_V6_DESCRIPTION: "Development vantage6 server."
-      ENV_V6_POSTGRES_HOST: v6-database
-      ENV_V6_POSTGRES_USER: postgres
-      ENV_V6_POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
-      ENV_V6_POSTGRES_DATABASE: vantage6
+      V6_SECRET_KEY_FILE: /run/secrets/v6-secret-key
+      V6_DESCRIPTION: "Development vantage6 server."
+      V6_POSTGRES_HOST: database
+      V6_POSTGRES_USER: postgres
+      V6_POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
+      V6_POSTGRES_DATABASE: vantage6
       # For development only, as we live mount /vantage6 we don't want
       # root:root .pyc files on the host.
+      # TODO: are we exlucluding .pyc files when building the image in vantage6?
       PYTHONDONTWRITEBYTECODE: 1
       GEVENT_SUPPORT: "True"
     volumes:
-      - ./vantage6_docker/v6-server/:/start-up.d/app/
-      - ./vantage6_docker/v6-common/:/start-up.d/common/
       # Development only:
-      - ./dev-v6-server/:/start-up.d/custom.d/
+      # fixtures and debugpy enabled start
+      - ./server/custom-start.d/:/custom-start.d/
       - ./vantage6/:/vantage6/
-    command: ["/start-up.d/app/run.sh"]
+    command: ["/run.sh"]
     secrets:
       - v6-secret-key
       - v6-root-password
       - postgres-password
 
-  v6-ui:
+  ui:
     image: harbor2.vantage6.ai/infrastructure/ui
     depends_on:
-      - v6-server
+      - server
     ports:
       - "127.0.6.1:8080:80"
     environment:
       SERVER_URL: http://127.0.6.1
       API_PATH: /api
 
-  v6-database:
+  database:
     image: postgres:12
     environment:
       POSTGRES_USER: postgres
@@ -59,117 +63,193 @@ services:
     secrets:
       - postgres-password
 
-  v6-node-mars:
-    image: harbor2.vantage6.ai/infrastructure/node:${V6_VERSION}
+  node-mars:
+    image: harbor2.vantage6.ai/infrastructure/dockerized-node:${V6_VERSION}
     depends_on:
-      - v6-server
+      - server
     ports:
       - "127.0.6.10:5678:5678"
     environment:
-      ENV_V6_API_KEY_FILE: /run/secrets/v6-node-mars-api-key
-      ENV_V6_SERVER_URL: http://v6-server
-      ENV_V6_SERVER_PORT: 80
-      ENV_V6_API_PATH: /api
-      DATA_VOLUME_NAME: mars-data
+      V6_API_KEY_FILE: /run/secrets/v6-node-mars-api-key
+      V6_SERVER_URL: http://server
+      V6_SERVER_PORT: 80
+      V6_API_PATH: /api
+      DATA_VOLUME_NAME: dev-v6_mars-data-vol
+      VPN_VOLUME_NAME: dev-v6_mars-vpn-vol
+      SSH_TUNNEL_VOLUME_NAME: dev-v6_mars-ssh-vol
+      # TODO: fix name in v6
+      SSH_SQUID_VOLUME_NAME: dev-v6_mars-squid-vol
       # For development only, as we live mount /vantage6 we don't want
       # root:root .pyc files on the host.
       PYTHONDONTWRITEBYTECODE: 1
       GEVENT_SUPPORT: "True"
-    command: ["/start-up.d/app/run.sh"]
+    command: ["/run.sh"]
     volumes:
-      - ./vantage6_docker/v6-node/:/start-up.d/app/
-      - ./vantage6_docker/v6-common/:/start-up.d/common/
+      # config template
+      - ./nodes/mars/config/config.yaml.j2:/mnt/config/config.yaml.j2
       # node container needs to talk to docker itself to start containers (algorithms)
       - /var/run/docker.sock:/var/run/docker.sock
       # same data volume will be mounted on the algorithm container
-      - mars-data:/mnt/data
+      - mars-data-vol:/mnt/data
+      # TODO: These volumes could be mounted from within the container since it already has the names?
+      # TODO: Some of them could just be created by the node an their existence transparent for the user?
+      # not tested
+      - mars-vpn-vol:/mnt/vpn
+      - mars-ssh-vol:/mnt/ssh
+      - mars-squid-vol:/mnt/squid
       # databases and databases.yaml.j2. Mounted /mnt because this is hardcoded in v6
       # see: https://github.com/vantage6/vantage6/blob/version/3.10.3/vantage6-node/vantage6/node/docker/docker_manager.py#L202-L205
-      - ./dev-nodes-databases/mars/:/mnt/databases
+      - ./nodes/mars/databases/:/mnt/databases
       # development only
+      # includes pre_run.sh which allows for debugging (via debugpy)
+      - ./nodes/custom-start.d/:/custom-start.d/
       - ./vantage6/:/vantage6/
-      # includes pre_run.sh, that creates fixtures and allows for debugging (via debugpy)
-      - ./dev-v6-nodes/:/start-up.d/custom.d/
     secrets:
       - v6-node-mars-api-key
 
-  v6-node-saturn:
-    image: harbor2.vantage6.ai/infrastructure/node:${V6_VERSION}
+  # TODO: update saturn
+  node-saturn:
+    image: harbor2.vantage6.ai/infrastructure/dockerized-node:${V6_VERSION}
     depends_on:
-      - v6-server
+      - server
     ports:
       - "127.0.6.11:5678:5678"
     environment:
-      ENV_V6_API_KEY_FILE: /run/secrets/v6-node-saturn-api-key
-      ENV_V6_SERVER_URL: http://v6-server
-      ENV_V6_SERVER_PORT: 80
-      ENV_V6_API_PATH: /api
-      DATA_VOLUME_NAME: saturn-data
+      V6_API_KEY_FILE: /run/secrets/v6-node-saturn-api-key
+      V6_SERVER_URL: http://server
+      V6_SERVER_PORT: 80
+      V6_API_PATH: /api
+      DATA_VOLUME_NAME: dev-v6_saturn-data-vol
       # For development only, as we live mount /vantage6 we don't want
       # root:root pyc's on the host.
       PYTHONDONTWRITEBYTECODE: 1
       GEVENT_SUPPORT: "True"
-    command: ["/start-up.d/app/run.sh"]
+    command: ["/run.sh"]
     volumes:
-      - ./vantage6_docker/v6-node/:/start-up.d/app/
-      - ./vantage6_docker/v6-common/:/start-up.d/common/
       # node container needs to talk to docker itself to start containers (algorithms)
       - /var/run/docker.sock:/var/run/docker.sock
       # same data volume will be mounted on the algorithm container
-      - saturn-data:/mnt/data
+      - saturn-data-vol:/mnt/data
       # databases and databases.yaml.j2. Mounted /mnt because this is hardcoded in v6
       # see: https://github.com/vantage6/vantage6/blob/version/3.10.3/vantage6-node/vantage6/node/docker/docker_manager.py#L202-L205
-      - ./dev-nodes-databases/saturn/:/mnt/databases
+      - ./nodes/saturn/databases/:/mnt/databases
       # development only
+      # includes pre_run.sh which allows for debugging (via debugpy)
+      - ./nodes/custom-start.d/:/custom-start.d/      
       - ./vantage6/:/vantage6/
-      # includes pre_run.sh, that creates fixtures and allows for debugging (via debugpy)
-      - ./dev-v6-nodes/:/start-up.d/custom.d/
     secrets:
       - v6-node-saturn-api-key
 
-  v6-node-jupiter:
-    image: harbor2.vantage6.ai/infrastructure/node:${V6_VERSION}
+  # TODO: update jupiter
+  node-jupiter:
+    image: harbor2.vantage6.ai/infrastructure/dockerized-node:${V6_VERSION}
     depends_on:
-      - v6-server
+      - server
     environment:
-      ENV_V6_API_KEY_FILE: /run/secrets/v6-node-jupiter-api-key
-      ENV_V6_SERVER_URL: http://v6-server
-      ENV_V6_SERVER_PORT: 80
-      ENV_V6_API_PATH: /api
+      V6_API_KEY_FILE: /run/secrets/v6-node-jupiter-api-key
+      V6_SERVER_URL: http://server
+      V6_SERVER_PORT: 80
+      V6_API_PATH: /api
       DATA_VOLUME_NAME: jupiter-data
       # For development only, as we live mount /vantage6 we don't want
       # root:root pyc's on the host.
       PYTHONDONTWRITEBYTECODE: 1
       GEVENT_SUPPORT: "True"
-    command: ["/start-up.d/app/run.sh"]
+    command: ["/run.sh"]
     volumes:
-      - ./vantage6_docker/v6-node/:/start-up.d/app/
-      - ./vantage6_docker/v6-common/:/start-up.d/common/
       # node container needs to talk to docker itself to start containers (algorithms)
       - /var/run/docker.sock:/var/run/docker.sock
       # same data volume will be mounted on the algorithm container
-      - jupiter-data:/mnt/data
+      - jupiter-data-vol:/mnt/data
       # databases and databases.yaml.j2. Mounted /mnt because this is hardcoded in v6
       # see: https://github.com/vantage6/vantage6/blob/version/3.10.3/vantage6-node/vantage6/node/docker/docker_manager.py#L202-L205
-      - ./dev-nodes-databases/jupiter/:/mnt/databases
+      - ./nodes/jupiter/databases/:/mnt/databases
       # development only
+      # includes pre_run.sh which allows for debugging (via debugpy)
+      - ./nodes/custom-start.d/:/custom-start.d/ 
       - ./vantage6/:/vantage6/
-      # includes pre_run.sh, that creates fixtures and allows for debugging (via debugpy)
-      - ./dev-v6-nodes/:/start-up.d/custom.d/
     secrets:
       - v6-node-jupiter-api-key
 
 # NOTE: nodes will copy file databases to this volume (/mnt/data), and mount it
 #       in the algorithm container. They will also create task directories. (WIP)
 #       Vantage6 uses the env var DATA_VOLUME_NAME to determine the name of the
-#       volume to mount in the algorithm container.
+#       volume to mount in the algorithm container. A similar approach is used
+#       for the ssh volumes, vpn, etc..
 volumes:
-  mars-data:
-    name: "mars-data"
-  saturn-data:
-    name: "saturn-data"
-  jupiter-data:
-    name: "jupiter-data"
+  # Mars node
+  # TODO: creating most of these volumes should be optional, and done by the node (probably)
+  # ... just testing here
+  # NOTE: if you modify the path in 'device', you probably have to delete the volume and try again
+  mars-ssh-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/mars/volumes/ssh'
+  mars-vpn-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/mars/volumes/vpn'
+  mars-data-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/mars/volumes/data'
+  mars-logs-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/mars/volumes/logs'
+  mars-squid-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/mars/volumes/squid'
+  # Saturn node
+  saturn-ssh-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/saturn/volumes/ssh'
+  saturn-vpn-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/saturn/volumes/vpn'
+  saturn-data-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/saturn/volumes/data'
+  saturn-logs-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/saturn/volumes/logs'
+  saturn-squid-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/saturn/volumes/squid'
+  # Jupiter node
+  jupiter-data-vol:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: './nodes/jupiter/volumes/data'
+
 
 secrets:
   v6-secret-key:
